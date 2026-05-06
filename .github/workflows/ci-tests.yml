@@ -16,11 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            xvfb: true
-          - os: windows-latest
-            xvfb: false
+        - os: ubuntu-latest
+        - os: windows-latest
 
     steps:
       - name: Checkout
@@ -37,14 +34,14 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-asyncio pytest-cov pytest-timeout PySide6
 
-      - name: Run tests (Linux + Xvfb)
-        if: matrix.xvfb
-        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1
-        with:
-          run: pytest tests/ --tb=short -q
+      - name: Run tests (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: pytest tests/ --tb=short -q
 
       - name: Run tests (Windows)
-        if: "!matrix.xvfb"
+        if: matrix.os == 'windows-latest'
         run: pytest tests/ --tb=short -q
 
       - name: Coverage report
